@@ -55,6 +55,9 @@ class GitHubController extends Controller
                 Auth::login($user, true);
             }
 
+            // GitHubのアクセストークンをセッションに保存
+            session(['github_access_token' => $githubUser->token]);
+
             // ユーザーがログインしていることを確認するためのログ
             Log::info('User logged in', ['user' => $user, 'session' => session()->all()]);
 
@@ -75,8 +78,10 @@ class GitHubController extends Controller
         try {
             Log::info('Starting logout process');
 
+            // GitHubのアクセストークンを取得
+            $accessToken = session('github_access_token');
+
             // Supabaseからのログアウト処理
-            $accessToken = $request->session()->get('supabase_access_token'); // Supabaseのアクセストークンをセッションから取得
             $client = new \GuzzleHttp\Client();
             $supabaseLogoutUrl = env('SUPABASE_URL') . '/auth/v1/logout';
             $response = $client->post($supabaseLogoutUrl, [
