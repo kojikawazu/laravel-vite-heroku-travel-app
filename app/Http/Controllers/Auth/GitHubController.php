@@ -72,25 +72,31 @@ class GitHubController extends Controller
      */
     public function logout(Request $request)
     {
-        $client = new Client();
-        $supabaseLogoutUrl = env('SUPABASE_URL') . '/auth/v1/logout';
-        
         try {
-            $response = $client->post($supabaseLogoutUrl, [
-                'headers' => [
-                    'apikey' => env('SUPABASE_API_KEY'),
-                    'Authorization' => 'Bearer ' . env('SUPABASE_API_KEY'),
-                ],
-            ]);
-
-            // Laravelからのログアウト処理
-            Auth::logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-
-            return redirect('/');
-        } catch (\Exception $e) {
-            return redirect('/')->withErrors('Logout failed: ' . $e->getMessage());
-        }
+            Log::info('Starting logout process');
+         // Supabaseからのログアウト処理
+         $client = new \GuzzleHttp\Client();
+         $supabaseLogoutUrl = env('SUPABASE_URL') . '/auth/v1/logout';
+         $response = $client->post($supabaseLogoutUrl, [
+             'headers' => [
+                 'apikey' => env('SUPABASE_API_KEY'),
+                 'Authorization' => 'Bearer ' . env('SUPABASE_API_KEY'),
+             ],
+         ]);
+ 
+         Log::info('Supabase logout response', ['response' => $response->getBody()->getContents()]);
+ 
+         // Laravelからのログアウト処理
+         Auth::logout();
+         $request->session()->invalidate();
+         $request->session()->regenerateToken();
+ 
+         Log::info('User logged out successfully');
+ 
+         return redirect('/')->with('status', 'Logout successful');
+     } catch (\Exception $e) {
+         Log::error('Logout failed', ['error' => $e->getMessage()]);
+         return redirect('/')->withErrors('Logout failed: ' . $e->getMessage());
+     }
     }
 }
