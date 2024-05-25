@@ -256,6 +256,22 @@ SESSION_DOMAIN=[herokuドメイン名]
 
 # URL
 
+-   heroku
+
+https://dashboard.heroku.com/
+
+-   supabase
+
+https://supabase.com/
+
 https://qiita.com/kuro_maru/items/b740968ddca9c2337cb0
 
+https://qiita.com/kakudaisuke/items/bdbe1b1985e73cb3299f
+
 https://arrown-blog.com/laravel-vite-error/
+
+https://secure-strings.com/force-laravel-app-https/
+
+https://kinsta.com/jp/blog/laravel-authentication/
+
+https://laracasts.com/discuss/channels/laravel/socialite-how-to-logout
