@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\GitHubController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,3 +21,7 @@ Route::get('/', function () {
 Route::get('/test', function () {
     return view('test');
 });
+
+Route::get('auth/github', [GitHubController::class, 'redirectToProvider']);
+Route::get('auth/v1/callback', [GitHubController::class, 'handleProviderCallback']);
+Route::get('logout', [GitHubController::class, 'logout']);

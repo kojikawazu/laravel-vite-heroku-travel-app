@@ -1,4 +1,4 @@
-# Use the official Laravel image as a base
+# Use the official Composer image as a base for building PHP dependencies
 FROM composer:2 AS build
 
 # Set working directory
@@ -29,7 +29,12 @@ FROM php:8.2-fpm
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy PHP dependencies from the build stage
+# Install dependencies and PHP extensions
+RUN apt-get update && \
+    apt-get install -y libpq-dev && \
+    docker-php-ext-install pdo_pgsql
+
+# Copy PHP dependencies and application code from the build stage
 COPY --from=build /app .
 
 # Copy built assets from the assets stage
