@@ -29,33 +29,35 @@ class GitHubController extends Controller
      */
     public function handleProviderCallback()
     {
-        $githubUser = Socialite::driver('github')->stateless()->user();
+        try {
+            $githubUser = Socialite::driver('github')->stateless()->user();
+            
+            $user = User::where('github_id', $githubUser->id)
+                        ->orWhere('email', $githubUser->email)
+                        ->first();
 
-        // Check if the user already exists
-        $user = User::where('github_id', $githubUser->id)
-                    ->orWhere('email', $githubUser->email)
-                    ->first();
+            if ($user) {
+                if (is_null($user->github_id)) {
+                    $user->github_id = $githubUser->id;
+                    $user->save();
+                }
+                Auth::login($user, true);
+            } else {
+                $user = User::create([
+                    'name' => $githubUser->name,
+                    'email' => $githubUser->email,
+                    'github_id' => $githubUser->id,
+                    'avatar' => $githubUser->avatar,
+                    'password' => bcrypt(Str::random(16)),
+                ]);
 
-        if ($user) {
-            if (is_null($user->github_id)) {
-                $user->github_id = $githubUser->id;
-                $user->save();
+                Auth::login($user, true);
             }
-            Auth::login($user, true);
-        } else {
-            // Create a new user if not exists
-            $user = User::create([
-                'name' => $githubUser->name,
-                'email' => $githubUser->email,
-                'github_id' => $githubUser->id,
-                'avatar' => $githubUser->avatar,
-                'password' => bcrypt(Str::random(16)),
-            ]);
 
-            Auth::login($user, true);
+            return redirect('/');
+        } catch (\Exception $e) {
+            return redirect('/')->withErrors(['login' => 'Authentication failed.']);
         }
-
-        return redirect('/');
     }
 
     /**
