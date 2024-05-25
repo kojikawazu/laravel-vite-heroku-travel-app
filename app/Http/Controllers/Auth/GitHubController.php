@@ -33,6 +33,9 @@ class GitHubController extends Controller
         try {
             $githubUser = Socialite::driver('github')->stateless()->user();
             
+            // GitHubのアクセストークンをログに出力して確認
+            Log::info('GitHub access token', ['token' => $githubUser->token]);
+
             $user = User::where('github_id', $githubUser->id)
                         ->orWhere('email', $githubUser->email)
                         ->first();
@@ -80,6 +83,9 @@ class GitHubController extends Controller
 
             // GitHubのアクセストークンを取得
             $accessToken = session('github_access_token');
+
+            // アクセストークンが正しく取得されているかログに出力
+            Log::info('Access token for logout', ['token' => $accessToken]);
 
             // Supabaseからのログアウト処理
             $client = new \GuzzleHttp\Client();
