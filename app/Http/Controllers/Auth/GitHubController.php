@@ -74,14 +74,15 @@ class GitHubController extends Controller
     {
         try {
             Log::info('Starting logout process');
-            
+
             // Supabaseからのログアウト処理
+            $accessToken = $request->session()->get('supabase_access_token'); // Supabaseのアクセストークンをセッションから取得
             $client = new \GuzzleHttp\Client();
             $supabaseLogoutUrl = env('SUPABASE_URL') . '/auth/v1/logout';
             $response = $client->post($supabaseLogoutUrl, [
                 'headers' => [
                     'apikey' => env('SUPABASE_API_KEY'),
-                    'Authorization' => 'Bearer ' . env('SUPABASE_API_KEY'),
+                    'Authorization' => 'Bearer ' . $accessToken,
                     'Content-Type' => 'application/json'
                 ],
             ]);
