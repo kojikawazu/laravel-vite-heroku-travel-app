@@ -1,3 +1,5 @@
+# Laravel + Vite 環境の構築
+
 # Laravel プロジェクトの作成
 
 ```bash
@@ -17,7 +19,7 @@ php artisan migrate
 # Docker の設定
 
 ```dockerfile
-# Use the official Laravel image as a base
+# Use the official Composer image as a base for building PHP dependencies
 FROM composer:2 AS build
 
 # Set working directory
@@ -48,7 +50,12 @@ FROM php:8.2-fpm
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy PHP dependencies from the build stage
+# Install dependencies and PHP extensions
+RUN apt-get update && \
+    apt-get install -y libpq-dev && \
+    docker-php-ext-install pdo_pgsql
+
+# Copy PHP dependencies and application code from the build stage
 COPY --from=build /app .
 
 # Copy built assets from the assets stage
@@ -56,7 +63,7 @@ COPY --from=assets /app/public/build ./public/build
 
 # Set permissions for storage and cache directories
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
@@ -90,10 +97,6 @@ services:
             - "9000:9000"
         volumes:
             - .:/var/www/html
-        environment:
-            - APP_ENV=local
-            - APP_DEBUG=true
-            - APP_KEY=base64:$(php artisan key:generate --show)
     web:
         image: nginx:alpine
         ports:
@@ -107,7 +110,7 @@ services:
 
 ## nginx.conf の作成
 
-```nginx:nginx.conf
+```nginx:nginx/nginx.conf
 server {
     listen 80;
     server_name localhost;
@@ -186,6 +189,7 @@ heroku create your-app-name
 
 ```bash
 heroku config:set APP_NAME=Laravel
+# 詳細はdelpy_env_template.shを参照すること
 ```
 
 ## Git リポジトリに変更をコミットし、Heroku にデプロイ
@@ -213,6 +217,12 @@ php artisan view:cache
 php artisan optimize:clear
 ```
 
+# heroku 環境へもぐる
+
+```bash
+heroku run bash
+```
+
 # エラーログの取得
 
 ```bash
@@ -220,8 +230,28 @@ heroku run bash
 cat storage/logs/laravel.log
 ```
 
+# セッションの確認
+
+```bash
+heroku run php artisan tinker
+>>> \DB::table('sessions')->get();
+```
+
 ```
 Vite manifest not found at: /app/public/build/manifest.json (View: /app/resources/views/layouts/guest.blade.php) (View: /app/resources/views/layouts/guest.blade.php)
+```
+
+# heroku デプロイへの注意点
+
+# ローカル環境から heroku 環境になると以下が変わります。
+
+```
+APP_ENV=production
+APP_URL=[herokuのhttp://ドメイン]
+GITHUB_REDIRECT_URI=[herokuのhttp://ドメイン]/auth/v1/callback
+SESSION_DRIVER=database
+SESSION_SECURE_COOKIE=true
+SESSION_DOMAIN=[herokuドメイン名]
 ```
 
 # URL
