@@ -54,6 +54,9 @@ class GitHubController extends Controller
                 Auth::login($user, true);
             }
 
+            // ユーザーがログインしていることを確認するためのログ
+            Log::info('User logged in', ['user' => $user]);
+
             return redirect('/');
         } catch (\Exception $e) {
             return redirect('/')->withErrors(['login' => 'Authentication failed.']);
