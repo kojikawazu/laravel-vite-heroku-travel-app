@@ -58,6 +58,22 @@ class GitHubController extends Controller
                 Auth::login($user, true);
             }
 
+            // SupabaseからJWTトークンを取得してセッションに保存
+            $client = new \GuzzleHttp\Client();
+            $supabaseAuthUrl = env('SUPABASE_URL') . '/auth/v1/token?grant_type=password';
+            $response = $client->post($supabaseAuthUrl, [
+                'headers' => [
+                    'apikey' => env('SUPABASE_API_KEY'),
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'email' => $user->email,
+                    'password' => 'user_password',  // 適切なユーザーパスワードに置き換える
+                ],
+            ]);
+            $supabaseToken = json_decode($response->getBody()->getContents(), true)['access_token'];
+            session(['supabase_access_token' => $supabaseToken]);
+
             // GitHubのアクセストークンをセッションに保存
             session(['github_access_token' => $githubUser->token]);
 
@@ -82,7 +98,7 @@ class GitHubController extends Controller
             Log::info('Starting logout process');
 
             // GitHubのアクセストークンを取得
-            $accessToken = session('github_access_token');
+            $accessToken = session('supabase_access_token');
 
             // アクセストークンが正しく取得されているかログに出力
             Log::info('Access token for logout', ['token' => $accessToken]);
