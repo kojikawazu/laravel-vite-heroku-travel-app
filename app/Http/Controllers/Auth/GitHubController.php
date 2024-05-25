@@ -81,6 +81,7 @@ class GitHubController extends Controller
                 'headers' => [
                     'apikey' => env('SUPABASE_API_KEY'),
                     'Authorization' => 'Bearer ' . env('SUPABASE_API_KEY'),
+                    'Content-Type' => 'application/json'
                 ],
             ]);
     
