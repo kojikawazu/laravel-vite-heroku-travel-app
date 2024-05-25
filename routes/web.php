@@ -26,6 +26,11 @@ Route::get('auth/github', [GitHubController::class, 'redirectToProvider']);
 Route::get('auth/v1/callback', [GitHubController::class, 'handleProviderCallback']);
 Route::get('/logout', [GitHubController::class, 'logout'])->name('logout');
 
+Route::get('/test-log', function () {
+    Log::info('This is a test log message');
+    return 'Log message has been written';
+});
+
 // Route::get('/set-session', function () {
 //     session(['test_key' => 'test_value']);
 //     return 'Session set';
