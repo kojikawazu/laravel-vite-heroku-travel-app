@@ -74,6 +74,7 @@ class GitHubController extends Controller
     {
         try {
             Log::info('Starting logout process');
+            
             // Supabaseからのログアウト処理
             $client = new \GuzzleHttp\Client();
             $supabaseLogoutUrl = env('SUPABASE_URL') . '/auth/v1/logout';
