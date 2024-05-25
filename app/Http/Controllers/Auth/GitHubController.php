@@ -56,10 +56,11 @@ class GitHubController extends Controller
             }
 
             // ユーザーがログインしていることを確認するためのログ
-            Log::info('User logged in', ['user' => $user]);
+            Log::info('User logged in', ['user' => $user, 'session' => session()->all()]);
 
             return redirect('/');
         } catch (\Exception $e) {
+            Log::error('Authentication failed', ['error' => $e->getMessage()]);
             return redirect('/')->withErrors(['login' => 'Authentication failed.']);
         }
     }

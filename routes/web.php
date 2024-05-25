@@ -25,3 +25,12 @@ Route::get('/test', function () {
 Route::get('auth/github', [GitHubController::class, 'redirectToProvider']);
 Route::get('auth/v1/callback', [GitHubController::class, 'handleProviderCallback']);
 Route::get('logout', [GitHubController::class, 'logout']);
+
+Route::get('/set-session', function () {
+    session(['test_key' => 'test_value']);
+    return 'Session set';
+});
+
+Route::get('/get-session', function () {
+    return session('test_key', 'default_value');
+});
